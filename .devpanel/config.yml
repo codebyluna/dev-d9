@@ -1,0 +1,49 @@
+version: "1.1"
+spec:
+  servicePort: 80
+  hostname: ""
+  sharedDir:
+    path: /var/www/html
+    storage: '5Gi'
+  podTemplate:
+    containers:
+      - name: php
+        image: 'devpanel/php:7.4-fpm'
+        env:
+          - name: "APP_ROOT"
+            value: "/var/www/html"
+          - name: "WEB_ROOT"
+            value: "/var/www/html/web"
+        ports:
+          - containerPort: 9000
+            name: fastcgi
+        resources:
+          requests:
+            memory: 256Mi
+            cpu: 50m
+          limits:
+            memory: 2Gi
+            cpu: 500m
+      - name: nginx
+        image: 'wodby/nginx:latest'
+        env:
+          - name: NGINX_SERVER_ROOT
+            value: "/var/www/html/web"
+          - name: "NGINX_VHOST_PRESET"
+            value: "drupal9"
+          - name: NGINX_BACKEND_HOST
+            value: '0.0.0.0'
+          - name: NGINX_SET_REAL_IP_FROM
+            value: "10.0.0.0/16"
+        ports:
+          - containerPort: 80
+            name: http
+          - containerPort: 443
+            name: https
+        resources:
+          requests:
+            memory: 128Mi
+            cpu: 50m
+          limits:
+            memory: 256Mi
+            cpu: 100m
